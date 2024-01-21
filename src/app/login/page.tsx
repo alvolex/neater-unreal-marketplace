@@ -7,9 +7,9 @@ import {
   signOut,
   User,
 } from "firebase/auth";
-import { firebaseApp } from "../layout";
 import { useEffect, useState } from "react";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { firebaseApp } from "@/firebase";
 
 export default function Login() {
   const [user, setUser] = useState<User | null>(null);
@@ -25,19 +25,11 @@ export default function Login() {
   const signIn = async () => {
     signInWithPopup(auth, provider)
       .then((result) => {
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential?.accessToken;
         const user = result.user;
-
         setUser(user);
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        const email = error.customData.email;
-        const credential = GoogleAuthProvider.credentialFromError(error);
-
-        console.error(errorCode, errorMessage, email, credential);
+        console.error({ error });
       });
   };
 
@@ -85,7 +77,6 @@ export default function Login() {
       ) : (
         <>
           <button onClick={() => signOutFromApp()}>Sign out</button>
-
           <button onClick={updateUserPref}>Update user preferences</button>
         </>
       )}

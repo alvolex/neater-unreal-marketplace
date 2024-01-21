@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User, getAuth } from 'firebase/auth';
-import { firebaseApp } from '@/app/layout';
+import { firebaseApp } from '@/firebase';
 
 export function useCurrentUser() {
   const [user, setUser] = useState<User | null>(null);

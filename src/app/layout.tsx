@@ -2,10 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.scss";
 
-import { initializeApp } from "firebase/app";
-import firebaseConfig from "../../firebaseconfig";
-export const firebaseApp = initializeApp(firebaseConfig);
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

@@ -1,8 +1,6 @@
 "use client";
 
 import { User, getAuth } from "firebase/auth";
-import { firebaseApp } from "./layout";
-import { useEffect, useState } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function Home() {
@@ -11,7 +9,6 @@ export default function Home() {
   return (
     <main>
       <h1>Home</h1>
-
       {user && <h2>Hello, {user.displayName}</h2>}
     </main>
   );
