@@ -1,6 +1,6 @@
 export async function GET(request: Request) {
   var myHeaders = new Headers({
-    Cookie: "EPIC_BEARER_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXX",
+    Cookie: "EPIC_BEARER_TOKEN="+ process.env.EPIC_BEARER_TOKEN + ";",
   });
 
   var requestOptions: RequestInit = {
