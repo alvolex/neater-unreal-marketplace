@@ -8,29 +8,35 @@ export async function GET(request: Request) {
     headers: myHeaders,
     redirect: "follow",
   };
-
+ 
   async function fetchData(start = 0) {
     try {
       const response = await fetch(
         `https://www.unrealengine.com/marketplace/api/assets/vault?lang=en-US&start=${start}&count=100`,
         requestOptions
       );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+      if (!response.ok || response.headers.get("content-type") !== "application/json; charset=utf-8") {
+        return {error: new Response("Bad response from server. Most likely due to an issue with the provided token.", { status: 500 })}
       }
 
       let data = await response.json();
       return data.data;
     } catch (error) {
       console.log("error", error);
-      return new Response("Error occurred", { status: 500 });
+      return {error: new Response("Error occurred on the server.", { status: 500 })};
     }
   }
 
   let data = await fetchData();
+  
+  if (data.error) {
+    return data.error;
+  }
+
   while(data.paging.start < data.paging.total) {
     let newData = await fetchData(data.paging.start + 100);
-    data.elements = data.elements.concat(newData);
+    data.elements = [...data.elements, ...newData.elements];
     data.paging.start = newData.paging.start;
   }
 
