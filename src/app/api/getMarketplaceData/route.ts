@@ -1,6 +1,12 @@
 export async function GET(request: Request) {
+  let token = request.headers.get("Authorization");
+
+  if (!token) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   var myHeaders = new Headers({
-    Cookie: "EPIC_BEARER_TOKEN="+ process.env.EPIC_BEARER_TOKEN + ";",
+    Cookie: "EPIC_BEARER_TOKEN="+ token + ";",
   });
 
   var requestOptions: RequestInit = {
@@ -34,11 +40,12 @@ export async function GET(request: Request) {
     return data.error;
   }
 
-  while(data.paging.start < data.paging.total) {
+  //!! todo: see if we can do this in a better way so we dont spam the server with requests
+  /* while(data.paging.start < data.paging.total) {
     let newData = await fetchData(data.paging.start + 100);
     data.elements = [...data.elements, ...newData.elements];
     data.paging.start = newData.paging.start;
-  }
+  } */
 
   return new Response(JSON.stringify(data), { status: 200 });
 }

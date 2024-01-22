@@ -8,11 +8,12 @@ import {
   User,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { firebaseApp } from "@/firebase";
 
 export default function Login() {
   const [user, setUser] = useState<User | null>(null);
+  const [bearerToken, setBearerToken] = useState<string>("");
 
   const provider = new GoogleAuthProvider();
   const auth = getAuth(firebaseApp);
@@ -49,6 +50,17 @@ export default function Login() {
         email: user.email,
         lastLogin: new Date(),
       });
+
+      const userRef = doc(db, "users", user.uid);
+      getDoc(doc(userRef, "preferences", "bearerToken")).then((docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data) {
+            setBearerToken(data.bearerToken);
+            localStorage.setItem("bearerToken", data.bearerToken);
+          }
+        }
+      });
     }
   }, [user, db]);
 
@@ -56,9 +68,10 @@ export default function Login() {
   const updateUserPref = async () => {
     if (user) {
       const userRef = doc(db, "users", user.uid);
-      const prefRef = doc(userRef, "preferences", "randomNumber");
+      const prefRef = doc(userRef, "preferences", "bearerToken");
 
-      await setDoc(prefRef, { value: Math.random() });
+      localStorage.setItem("bearerToken", bearerToken);
+      await setDoc(prefRef, { bearerToken });
     }
   };
 
@@ -77,7 +90,18 @@ export default function Login() {
       ) : (
         <>
           <button onClick={() => signOutFromApp()}>Sign out</button>
-          <button onClick={updateUserPref}>Update user preferences</button>
+          <div>
+            <label>
+              Bearer Token
+              <input
+                type="text"
+                placeholder="Enter your bearer token"
+                onChange={(e) => setBearerToken(e.target.value)}
+                value={bearerToken}
+              />
+            </label>
+            <button onClick={updateUserPref}>Update user preferences</button>
+          </div>
         </>
       )}
     </main>
