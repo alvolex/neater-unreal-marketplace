@@ -33,15 +33,15 @@ export default function Home() {
       <h1>Home</h1>
       {user && <h2>Hello, {user.displayName}</h2>}
       {marketplaceData.length > 0 && (
-        <div>
+        <div className="all-bundles">
           <h2>Marketplace Data</h2>
           <ul>
             {marketplaceData.map((item) => (
               <li key={item.id}>
-                {item.title}
+                <p>{item.title}</p>
                 {item.thumbnail && (
                   <img src={item.thumbnail} alt={item.title} />
-                )}
+                  )}
               </li>
             ))}
           </ul>
