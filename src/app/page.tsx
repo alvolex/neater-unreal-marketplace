@@ -38,10 +38,13 @@ export default function Home() {
           <ul>
             {marketplaceData.map((item) => (
               <li key={item.id}>
-                <p>{item.title}</p>
+                <h1>{item.title}</h1>
                 {item.thumbnail && (
                   <img src={item.thumbnail} alt={item.title} />
-                  )}
+                )}
+                {/* <div className="description">
+                  <p>{item.description}</p>
+                </div> */}
               </li>
             ))}
           </ul>

@@ -1,4 +1,4 @@
-:root{
+:root {
     background: black;
     color: white;
 }
@@ -10,15 +10,16 @@ div.all-bundles ul {
     list-style: none;
 
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     grid-gap: 10px;
-    grid-auto-rows: minmax(100px, auto);
+    grid-auto-rows: minmax(300px, auto);
     grid-auto-flow: dense;
 
     li {
         display: flex;
         position: relative;
         flex-direction: column;
+        justify-content: space-between;
         margin: 0 10px;
         padding: 0 10px;
         border: 1px solid #ccc;
@@ -32,17 +33,38 @@ div.all-bundles ul {
         transition: all 0.3s ease-in-out;
 
         &:hover {
-            transform: scale(1.1);
-            z-index: 10;
-
+            transform: scale(1.03);
             background: #333;
             color: #eee;
         }
 
-        p{
+        h1 {
             color: white;
             font-size: 1.5em;
             z-index: 5;
+            word-wrap: break-word;
+            background: linear-gradient(90deg, rgba(255, 83, 83, 0.377) 0%, rgba(4, 0, 255, 0.678) 50%, rgba(255, 83, 83, 0.377) 100%);
+            border-radius: 10px;
+            background-size: 200% auto;
+            animation: shine 4s linear infinite;
+            padding: 5px;
+        }
+
+        .description {
+            z-index: 5;
+
+            //blurred neon gradient bg
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.2) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin-bottom: 10px;
+
+            p {
+                color: white;
+                word-wrap: break-word;
+            }
         }
 
         img {
