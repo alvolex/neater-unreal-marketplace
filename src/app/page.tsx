@@ -1,8 +1,11 @@
 "use client";
 
+import { firebaseApp } from "@/firebase";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { MarketplaceData } from "@/types/MarketPlaceData";
 import axios from "axios";
+import firebase from "firebase/compat/app";
+import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -15,6 +18,9 @@ export default function Home() {
   useEffect(() => {
     const bearerToken = localStorage.getItem("bearerToken");
     if (user && bearerToken) {
+
+      //!! Todo: Check if data is older than 1 day, if so, fetch new data, otherwise use firestore data
+
       setLoading(true);
       axios
         .get("/api/getMarketplaceData", {
@@ -24,6 +30,20 @@ export default function Home() {
           let data: MarketplaceData = res.data;
           setMarketplaceData(data.elements);
           setLoading(false);
+
+          if (!user) return;
+          const db = getFirestore(firebaseApp);
+          const userRef = doc(db, "users", user.uid);
+          const prefRef = doc(userRef, "bundles", "bundleData");
+
+          setDoc(
+            prefRef,
+            {
+              bundleData: data.elements,
+              lastUpdated: new Date().toISOString(),
+            },
+            { merge: true }
+          );
         });
     }
   }, [user]);
