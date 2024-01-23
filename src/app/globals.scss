@@ -18,6 +18,24 @@ div.all-bundles ul {
     grid-auto-rows: minmax(300px, auto);
     grid-auto-flow: dense;
 
+    transition: all 0.3s ease-in-out;
+
+    &.collection-grid{
+        grid-auto-rows: auto;
+        li {
+            height: 60px;
+            max-height: 60px;
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        li.highlight{
+            box-shadow: 0 0 5px 2px #ad7aff44, 0 0 10px 5px #2f89ff60, 0 0 15px 7px hsla(93, 100%, 69%, 0.377), 0 0 20px 10px #ff69b446;
+            max-height: 100px; // Set a max-height that is at least as large as the height you want to transition to
+            height: 100px;
+        }
+    }
+
     li {
         display: flex;
         position: relative;

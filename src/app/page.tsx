@@ -16,6 +16,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import BundleGrid from "./components/BundleGrid";
 
 export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -87,7 +88,7 @@ export default function Home() {
       let diff = today.getTime() - lastUpdated.getTime();
       let diffHours = diff / (1000 * 3600);
 
-      if (diffHours < 24) {
+      if (diffHours < 6) {
         handleCachedData(userRef, bearerToken);
       } else {
         await getDataFromApi(bearerToken);
@@ -109,25 +110,7 @@ export default function Home() {
     <main>
       <h1>Home</h1>
       {user && <h2>Hello, {user.displayName}</h2>}
-      {marketplaceData.length > 0 && (
-        <div className="all-bundles">
-          <h2>Marketplace Data</h2>
-          <ul>
-            {marketplaceData.map((item) => (
-              <li key={item?.id}>
-                <h1>{item?.title}</h1>
-                {item?.thumbnail && (
-                  <img src={item.thumbnail} alt={item.title} />
-                )}
-                <div className="description">
-                  <p>{item.categories && item?.categories[0].name}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
+      <BundleGrid marketplaceData={marketplaceData} />
       {loading && <h1>Loading...</h1>}
     </main>
   );
