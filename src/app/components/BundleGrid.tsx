@@ -41,7 +41,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
         {activeMarketplaceData.length > 0 && (
           <ul>
             {activeMarketplaceData.map((item) => (
-              <li key={item?.id} onDragStart={(e) => setDraggedItem(e.target)} onDragEnd={() => setDraggedItem(null)}>
+              <li className="bundle-item" key={item?.id} onDragStart={(e) => setDraggedItem(e.target)} onDragEnd={() => setDraggedItem(null)}>
                 <h1>{item?.title}</h1>
                 {item?.thumbnail && (
                   <img src={item.thumbnail} alt={item.title} />

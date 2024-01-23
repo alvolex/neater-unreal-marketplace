@@ -26,6 +26,9 @@ export default function UserBundleCollections({
   );
   const [collections, setCollections] = useState<string[]>([]);
 
+  const [currentlyDraggedItem, setCurrentlyDraggedItem] = useState<any>(null);
+  const [lastHoveredElement, setLastHoveredElement] = useState<any>(null);
+
   let user = useCurrentUser();
   const db = getFirestore(firebaseApp);
 
@@ -40,11 +43,13 @@ export default function UserBundleCollections({
   };
 
   useEffect(() => {
-    if (!highlightedElement) {
-      return;
-    }
-    console.log(highlightedElement);
-    console.log(draggedItem);
+    if (!draggedItem && lastHoveredElement){
+        console.log("Dropping: ", currentlyDraggedItem?.alt, " on ", lastHoveredElement.innerText)
+        setHighlightedElement(null);
+        return;
+    };
+
+    setCurrentlyDraggedItem(draggedItem);
   }, [draggedItem]);
 
   useEffect(() => {
@@ -64,9 +69,11 @@ export default function UserBundleCollections({
 
   const handleDragEnter = (index: number, e: any) => {
     setHighlightedElement(index);
+    setLastHoveredElement(e.target);
+  };
 
-    console.log(draggedItem);
-    console.log(e.target);
+  const handleHoverWhileDragging = (e: any) => {
+    e.preventDefault();
   };
 
   return (
@@ -90,6 +97,7 @@ export default function UserBundleCollections({
             <li
               onDragEnter={(e) => handleDragEnter(index, e)}
               onDragLeave={() => setHighlightedElement(null)}
+              onDragOver={(e) => handleHoverWhileDragging(e)}
               className={highlightedElement === index ? "highlight" : ""}
               key={collection}
               onClick={() => changeCollection(collection)}

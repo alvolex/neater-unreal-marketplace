@@ -36,6 +36,12 @@ div.all-bundles ul {
         }
     }
 
+    li.bundle-item{
+        h1,div{
+            pointer-events: none;
+        }
+    }
+
     li {
         display: flex;
         position: relative;
