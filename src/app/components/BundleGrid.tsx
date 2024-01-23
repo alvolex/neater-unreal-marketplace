@@ -20,9 +20,9 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
   const db = getFirestore(firebaseApp);
 
   const handleCollectionChange = (collectionName: string) => {
-    if(collectionName.toLowerCase() === "all") {
-        setActiveMarketplaceData(marketplaceData);
-        return;
+    if (collectionName.toLowerCase() === "all") {
+      setActiveMarketplaceData(marketplaceData);
+      return;
     }
 
     if (!user) return;
@@ -49,9 +49,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
 
   useEffect(() => {
     setActiveMarketplaceData(
-      marketplaceData.filter(
-        (item) => collectionElements.includes(item.title)
-      )
+      marketplaceData.filter((item) => collectionElements.includes(item.id))
     );
   }, [collectionElements]);
 
@@ -72,9 +70,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
                 onDragEnd={() => setDraggedItem(null)}
               >
                 <h1>{item?.title}</h1>
-                {item?.thumbnail && (
-                  <img src={item.thumbnail} alt={item.title} />
-                )}
+                {item?.thumbnail && <img src={item.thumbnail} alt={item.id} />}
                 <div className="description">
                   <p>{item.categories && item?.categories[0].name}</p>
                 </div>
