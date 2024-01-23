@@ -4,9 +4,11 @@ import { firebaseApp } from "@/firebase";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   arrayUnion,
+  collection,
   doc,
-  getDoc,
+  getDocs,
   getFirestore,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -35,32 +37,61 @@ export default function UserBundleCollections({
   const createCollection = () => {
     if (!user) return;
     const userRef = doc(db, "users", user.uid);
-    updateDoc(userRef, {
-      collections: arrayUnion(newCollectionName),
+    const collectionsRef = doc(
+      userRef,
+      "collections",
+      newCollectionName.toLocaleLowerCase()
+    );
+
+    setDoc(collectionsRef, {
+      bundles: arrayUnion(),
+      name: newCollectionName,
     });
 
     setNewCollectionName("");
   };
 
+  const updateCollectionOnDrop = () => {
+    if (!user) return;
+    const userRef = doc(db, "users", user.uid);
+    const collectionsRef = doc(
+      userRef,
+      "collections",
+      lastHoveredElement.innerText.toLocaleLowerCase()
+    );
+
+    updateDoc(collectionsRef, {
+      bundles: arrayUnion(currentlyDraggedItem?.alt),
+      name: lastHoveredElement.innerText,
+    });
+  };
+
   useEffect(() => {
-    if (!draggedItem && lastHoveredElement){
-        console.log("Dropping: ", currentlyDraggedItem?.alt, " on ", lastHoveredElement.innerText)
-        setHighlightedElement(null);
-        return;
-    };
+    if (!draggedItem && lastHoveredElement) {
+      updateCollectionOnDrop();
+
+      setHighlightedElement(null);
+      return;
+    }
 
     setCurrentlyDraggedItem(draggedItem);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draggedItem]);
 
   useEffect(() => {
     if (!user) return;
     const userRef = doc(db, "users", user.uid);
+    const collectionsRef = collection(userRef, "collections");
 
-    getDoc(userRef).then((doc) => {
-      if (doc.exists()) {
-        setCollections(doc.data()?.collections);
-      }
+    //Get all the users collection name and store them in state
+    getDocs(collectionsRef).then((querySnapshot) => {
+      const collections: string[] = [];
+      querySnapshot.forEach((doc) => {
+        collections.push(doc.data().name);
+      });
+      setCollections(collections);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const changeCollection = (collectionName: string) => {
@@ -90,21 +121,22 @@ export default function UserBundleCollections({
         <button onClick={() => createCollection()}>Create</button>
       </div>
 
-      <div>
+      <div className="collection-wrapper">
         <p>My collections</p>
         <ul className="collection-grid">
-          {collections.map((collection, index) => (
-            <li
-              onDragEnter={(e) => handleDragEnter(index, e)}
-              onDragLeave={() => setHighlightedElement(null)}
-              onDragOver={(e) => handleHoverWhileDragging(e)}
-              className={highlightedElement === index ? "highlight" : ""}
-              key={collection}
-              onClick={() => changeCollection(collection)}
-            >
-              {collection}
-            </li>
-          ))}
+          {collections &&
+            collections.map((collection, index) => (
+              <li
+                onDragEnter={(e) => handleDragEnter(index, e)}
+                onDragLeave={() => setHighlightedElement(null)}
+                onDragOver={(e) => handleHoverWhileDragging(e)}
+                className={highlightedElement === index ? "highlight" : ""}
+                key={collection}
+                onClick={() => changeCollection(collection)}
+              >
+                {collection}
+              </li>
+            ))}
         </ul>
       </div>
     </div>
