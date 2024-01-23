@@ -109,9 +109,9 @@ export default function Home() {
   return (
     <main>
       <h1>Home</h1>
+      {loading && <h1>Loading...</h1>}
       {user && <h2>Hello, {user.displayName}</h2>}
       <BundleGrid marketplaceData={marketplaceData} />
-      {loading && <h1>Loading...</h1>}
     </main>
   );
 }
