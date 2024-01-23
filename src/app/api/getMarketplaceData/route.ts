@@ -41,11 +41,11 @@ export async function GET(request: Request) {
   }
 
   //!! todo: see if we can do this in a better way so we dont spam the server with requests
-  /* while(data.paging.start < data.paging.total) {
+  while(data.paging.start < data.paging.total) {
     let newData = await fetchData(data.paging.start + 100);
     data.elements = [...data.elements, ...newData.elements];
     data.paging.start = newData.paging.start;
-  } */
+  }
 
   return new Response(JSON.stringify(data), { status: 200 });
 }

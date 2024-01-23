@@ -4,8 +4,15 @@ import { firebaseApp } from "@/firebase";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { MarketplaceData } from "@/types/MarketPlaceData";
 import axios from "axios";
+import { User } from "firebase/auth";
 import firebase from "firebase/compat/app";
-import { doc, getFirestore, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getFirestore,
+  setDoc,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -15,36 +22,66 @@ export default function Home() {
   >([]);
   let user = useCurrentUser();
 
+  const getDataFromApi = async (bearerToken: string) => {
+    const res = await axios.get("/api/getMarketplaceData", {
+      headers: { Authorization: `${bearerToken}` },
+    });
+    let data: MarketplaceData = res.data;
+    setMarketplaceData(data.elements);
+    setLoading(false);
+
+    if (!user) return;
+    console.log("Updating cached data");
+    const db = getFirestore(firebaseApp);
+    const userRef = doc(db, "users", user.uid);
+    const bundlesCollectionRef = collection(userRef, "bundles");
+    const bundleDataDocRef = doc(bundlesCollectionRef, "bundleData");
+
+    await setDoc(bundleDataDocRef, {
+      bundleData: data.elements,
+    });
+
+    const lastUpdatedDocRef = doc(bundlesCollectionRef, "lastUpdated");
+    await setDoc(lastUpdatedDocRef, {
+      lastUpdated: new Date().toISOString(),
+    });
+  };
+
+  const fetchData = async (user: User, bearerToken: string) => {
+    const db = getFirestore(firebaseApp);
+    const userRef = doc(db, "users", user.uid);
+    const lastUpdateRef = doc(userRef, "bundles", "lastUpdated");
+    const bundleDataRef = doc(userRef, "bundles", "bundleData");
+
+    const docSnap = await getDoc(lastUpdateRef);
+    if (docSnap.exists()) {
+      let lastUpdated = new Date((docSnap.data() as any).lastUpdated);
+      let today = new Date();
+      let diff = today.getTime() - lastUpdated.getTime();
+      let diffHours = diff / (1000 * 3600);
+
+      if (diffHours < 6) {
+        const bundleDataSnap = await getDoc(bundleDataRef);
+        if (bundleDataSnap.exists()) {
+          console.log("Using cached data");
+          setMarketplaceData((bundleDataSnap.data() as any).bundleData);
+          setLoading(false);
+        } else {
+          await getDataFromApi(bearerToken);
+        }
+      } else {
+        await getDataFromApi(bearerToken);
+      }
+    } else {
+      await getDataFromApi(bearerToken);
+    }
+  };
+
   useEffect(() => {
     const bearerToken = localStorage.getItem("bearerToken");
     if (user && bearerToken) {
-
-      //!! Todo: Check if data is older than 1 day, if so, fetch new data, otherwise use firestore data
-
       setLoading(true);
-      axios
-        .get("/api/getMarketplaceData", {
-          headers: { Authorization: `${bearerToken}` },
-        })
-        .then((res) => {
-          let data: MarketplaceData = res.data;
-          setMarketplaceData(data.elements);
-          setLoading(false);
-
-          if (!user) return;
-          const db = getFirestore(firebaseApp);
-          const userRef = doc(db, "users", user.uid);
-          const prefRef = doc(userRef, "bundles", "bundleData");
-
-          setDoc(
-            prefRef,
-            {
-              bundleData: data.elements,
-              lastUpdated: new Date().toISOString(),
-            },
-            { merge: true }
-          );
-        });
+      fetchData(user, bearerToken);
     }
   }, [user]);
 
