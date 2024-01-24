@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { firebaseApp } from "@/firebase";
+import "./bundles.scss";
 
 interface BundleGridProps {
   marketplaceData: MarketplaceData["elements"];
