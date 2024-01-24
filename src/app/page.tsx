@@ -17,6 +17,7 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import BundleGrid from "./components/BundleGrid";
+import Link from "next/link";
 
 export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -108,9 +109,10 @@ export default function Home() {
 
   return (
     <main>
-      <h1>Home</h1>
+      <h1>Bundle view</h1>
       {loading && <h1>Loading...</h1>}
       {user && <h2>Hello, {user.displayName}</h2>}
+      {user ? <h2><Link href={'/login'}> Go to profile page</Link></h2> : <h2><Link href={'/login'}> Sign in..</Link></h2>}
       <BundleGrid marketplaceData={marketplaceData} />
     </main>
   );

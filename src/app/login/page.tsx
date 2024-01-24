@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { firebaseApp } from "@/firebase";
+import Link from "next/link";
 
 export default function Login() {
   const [user, setUser] = useState<User | null>(null);
@@ -82,9 +83,9 @@ export default function Login() {
 
   return (
     <main>
-      <h1>Login</h1>
-
+      {user ? <h1>Profile</h1> : <h1>Login</h1>}
       {user && <h2>Hello {user.displayName}</h2>}
+      {user && <p><Link href={'/'}>See bundles</Link></p>}
       {!user ? (
         <button onClick={signIn}>Signup / Login with google</button>
       ) : (
