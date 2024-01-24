@@ -16,6 +16,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
   const [draggedItem, setDraggedItem] = useState<any>(null);
   const [collectionElements, setCollectionElements] = useState<string[]>([]);
   const [sortCategories, setSortCategories] = useState<string[]>([]);
+  const [sortSeller, setSortSeller] = useState<string[]>([]);
 
   let user = useCurrentUser();
   const db = getFirestore(firebaseApp);
@@ -25,6 +26,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
       setActiveMarketplaceData(marketplaceData);
       setCurrentCollectionData(marketplaceData);
       setSortCategories(getUniqueCategories(marketplaceData));
+      setSortSeller(getUniqueSellerNames(marketplaceData));
       return;
     }
 
@@ -59,8 +61,24 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
     );
   };
 
+  const sortActiveMarketplaceDataBySeller = (seller: string) => {
+    if (seller === "all") {
+      setActiveMarketplaceData(currentCollectionData);
+      return;
+    }
+
+    setActiveMarketplaceData(
+      currentCollectionData.filter(
+        (item) => item.seller.name === seller
+      )
+    );
+  };
+
   useEffect(() => {
     setActiveMarketplaceData(marketplaceData);
+    setCurrentCollectionData(marketplaceData);
+    setSortCategories(getUniqueCategories(marketplaceData));
+    setSortSeller(getUniqueSellerNames(marketplaceData));
   }, [marketplaceData]);
 
   const getUniqueCategories = (dataSet: MarketplaceData["elements"]) => {
@@ -74,10 +92,26 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
       },
       []
     );
-
-    return uniqueCategories;
+    
+    return uniqueCategories.sort((a, b) => a.localeCompare(b));
   }
 
+  const getUniqueSellerNames = (dataSet: MarketplaceData["elements"]) => {
+    let allCategories = dataSet
+      .map((item) => item.seller.name)
+      .filter(Boolean);
+
+    let uniqueSellerNames = allCategories.reduce(
+      (unique: string[], item: any) => {
+        return unique.includes(item) ? unique : [...unique, item];
+      },
+      []
+    );
+
+    return uniqueSellerNames.sort((a, b) => a.localeCompare(b));
+  }
+
+  // Update active marketplace data when collection elements change
   useEffect(() => {
     let activeData = marketplaceData.filter((item) =>
       collectionElements.includes(item.id)
@@ -86,10 +120,13 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
     setActiveMarketplaceData(activeData);
     setCurrentCollectionData(activeData);
     setSortCategories(getUniqueCategories(marketplaceData));
+    setSortSeller(getUniqueSellerNames(marketplaceData));
   }, [collectionElements]);
 
+  // Update sort categories when collection data changes so the categories are always relevant
   useEffect(() => {
     setSortCategories(getUniqueCategories(currentCollectionData));
+    setSortSeller(getUniqueSellerNames(currentCollectionData));
   }, [currentCollectionData]);
 
   return (
@@ -97,6 +134,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
       <div>
         <div className="bundle-sort">
           SORTING
+          {/* Categories */}
           <label>
             Categories
             <select
@@ -111,6 +149,25 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
               {sortCategories.map((category) => (
                 <option key={category} value={category}>
                   {category}
+                </option>
+              ))}
+            </select>
+          </label>
+          {/* Seller */}
+          <label>
+            Seller
+            <select
+              title="sortSeller"
+              name="sortSeller"
+              id="sortSeller"
+              onChange={(e) =>
+                sortActiveMarketplaceDataBySeller(e.target.value)
+              }
+            >
+              <option value="all">All</option>
+              {sortSeller.map((seller) => (
+                <option key={seller} value={seller}>
+                  {seller}
                 </option>
               ))}
             </select>

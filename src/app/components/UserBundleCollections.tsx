@@ -34,7 +34,7 @@ export default function UserBundleCollections({
   let user = useCurrentUser();
   const db = getFirestore(firebaseApp);
 
-  const createCollection = () => {
+  const createCollection = async () => {
     if (!user) return;
     const userRef = doc(db, "users", user.uid);
     const collectionsRef = doc(
@@ -43,11 +43,12 @@ export default function UserBundleCollections({
       newCollectionName.toLocaleLowerCase()
     );
 
-    setDoc(collectionsRef, {
+    await setDoc(collectionsRef, {
       bundles: arrayUnion(),
       name: newCollectionName,
     });
 
+    setCollections([...collections, newCollectionName]);
     setNewCollectionName("");
   };
 
