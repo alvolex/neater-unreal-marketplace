@@ -27,7 +27,7 @@ export default function UserBundleCollections({
     null
   );
   const [collections, setCollections] = useState<string[]>([]);
-
+  const [activeCollectionIndex, setActiveCollectionIndex] = useState<number>(0);
   const [currentlyDraggedItem, setCurrentlyDraggedItem] = useState<any>(null);
   const [lastHoveredElement, setLastHoveredElement] = useState<any>(null);
 
@@ -94,7 +94,8 @@ export default function UserBundleCollections({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const changeCollection = (collectionName: string) => {
+  const changeCollection = (collectionName: string, index: number) => {
+    setActiveCollectionIndex(index);
     handleCollectionChange(collectionName);
   };
 
@@ -130,9 +131,9 @@ export default function UserBundleCollections({
                 onDragEnter={(e) => handleDragEnter(index, e)}
                 onDragLeave={() => setHighlightedElement(null)}
                 onDragOver={(e) => handleHoverWhileDragging(e)}
-                className={highlightedElement === index ? "highlight" : ""}
+                className={(highlightedElement === index ? "highlight" : "") + (activeCollectionIndex === index ? "active" : "")}
                 key={collection}
-                onClick={() => changeCollection(collection)}
+                onClick={(e) => changeCollection(collection, index)}
               >
                 {collection}
               </li>
