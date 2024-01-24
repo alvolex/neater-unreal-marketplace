@@ -2,7 +2,7 @@ import { MarketplaceData } from "@/types/MarketPlaceData";
 import UserBundleCollections from "./UserBundleCollections";
 import { useEffect, useState } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { DocumentData, DocumentSnapshot, doc, getDoc, getDocFromCache, getFirestore, initializeFirestore, persistentLocalCache } from "firebase/firestore";
 import { firebaseApp } from "@/firebase";
 import "./bundles.scss";
 
@@ -39,7 +39,14 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
         "collections",
         collectionName.toLowerCase()
       );
-      const collectionDoc = await getDoc(collectionRef);
+
+      let collectionDoc: DocumentSnapshot<DocumentData, DocumentData>;
+      try {
+        collectionDoc = await getDocFromCache(collectionRef);
+      } catch (error) {
+        collectionDoc = await getDoc(collectionRef);
+      }
+
       const collectionData = collectionDoc.data();
 
       setCollectionElements(collectionData?.bundles || []);
@@ -186,6 +193,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
                   key={item?.id}
                   onDragStart={(e) => setDraggedItem(e.target)}
                   onDragEnd={() => setDraggedItem(null)}
+                  onClick={() => window.open("https://www.unrealengine.com/marketplace/en-US/item/" + item.catalogItemId, "_blank")}
                 >
                   <h1>{item?.title}</h1>
                   {item?.thumbnail && (
