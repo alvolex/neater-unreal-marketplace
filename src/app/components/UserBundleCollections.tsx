@@ -143,8 +143,8 @@ export default function UserBundleCollections({
 
   return (
     <div>
-      <div ref={removeModalRef} className="remove-modal">
-        <h2>Are you sure you want to remove this element?</h2>
+      <div ref={removeModalRef} className="remove-modal border-anim">
+        <h2>Are you sure you want to remove this collection?</h2>
         <div className="button-wrapper">
           <button onClick={() => removeCollection(collectionToRemove)}>
             Yes

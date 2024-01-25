@@ -59,9 +59,10 @@ div.all-bundles ul {
         background: #eee;
         color: #333;
         font-weight: bold;
-        font-size: 1.2em;
+        font-size: 1.4em;
         text-transform: uppercase;
         transition: all 0.3s ease-in-out;
+        opacity: 1;
 
         &.active {
             background: #333;
@@ -84,15 +85,25 @@ div.all-bundles ul {
             }
         }
 
+        h1,
+        p {
+            transition: opacity 0.5s ease;
+        }
+
         &:hover {
             transform: scale(1.03);
             background: #333;
             color: #eee;
+
+            h1,
+            p {
+                opacity: 0.1;
+            }
         }
 
         h1 {
             color: white;
-            font-size: 1.5em;
+            font-size: 1.2em;
             z-index: 5;
             word-wrap: break-word;
             background: linear-gradient(90deg, rgba(255, 83, 83, 0.377) 0%, rgba(4, 0, 255, 0.678) 50%, rgba(255, 83, 83, 0.377) 100%);
@@ -106,16 +117,18 @@ div.all-bundles ul {
             z-index: 5;
 
             //blurred neon gradient bg
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.2) 100%);
+            background: linear-gradient(90deg, rgba(0, 0, 0, 0.445) 0%, rgba(85, 0, 0, 0.411) 50%, rgba(56, 0, 0, 0.5) 100%);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 5px;
-            padding: 5px 10px;
+            padding: 0 5px;
             margin-bottom: 10px;
 
             p {
                 color: white;
                 word-wrap: break-word;
+                margin: 2px 4px;
+                font-size: 0.8em;
             }
         }
 
@@ -133,7 +146,7 @@ div.all-bundles ul {
     }
 }
 
-.bundle-sort{
+.bundle-sort {
     display: flex;
     justify-content: end;
     align-items: center;
@@ -142,17 +155,17 @@ div.all-bundles ul {
     margin-right: 1.5rem;
 }
 
-.remove-modal{
+.remove-modal {
     display: none;
     text-align: center;
 
-    .button-wrapper{
+    .button-wrapper {
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 1rem;
 
-        button{
+        button {
             padding: 0.5rem 1rem;
             border-radius: 5px;
             border: none;
@@ -162,13 +175,13 @@ div.all-bundles ul {
             text-transform: uppercase;
             transition: all 0.3s ease-in-out;
 
-            &:hover{
+            &:hover {
                 transform: scale(1.03);
             }
         }
     }
 
-    &.active{
+    &.active {
         //absolute position in the center
         position: absolute;
         top: 50%;
@@ -181,8 +194,16 @@ div.all-bundles ul {
         align-items: center;
         gap: 1rem;
         padding: 1rem;
-        background: #ff0000;
         border-radius: 5px;
         max-width: 300px;
+        background: linear-gradient(45deg, rgba(255, 0, 89, 1) 0%, rgba(0, 179, 255, 1) 33%, rgba(255, 0, 89, 1) 66%, rgba(0, 179, 255, 1) 100%);
+        background-size: 400% 400%;
+        animation: loop 4s linear infinite;
     }
+}
+
+.border-anim{
+    border: 4px solid #ffffff;
+    border-radius: 5px;
+    animation: border 4s linear infinite;
 }
