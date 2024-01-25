@@ -113,7 +113,7 @@ export default function UserBundleCollections({
     );
 
     await deleteDoc(collectionsRef);
-    removeModalRef.current?.classList.remove('active');
+    removeModalRef.current?.classList.remove("active");
     setCollections(collections.filter((name) => name !== collectionName));
   };
 
@@ -126,8 +126,37 @@ export default function UserBundleCollections({
     e.preventDefault();
   };
 
+  const positionModal = (e: any) => {
+    var x = e.clientX;
+    var y = e.clientY;
+    x < 170 ? (x = 170) : (x = x);
+
+    if (x > window.innerWidth - 130) {
+      x = window.innerWidth - 130;
+    }
+
+    // @ts-ignore
+    removeModalRef.current.style.left = `${x}px`;
+    // @ts-ignore
+    removeModalRef.current.style.top = `${y}px`;
+  };
+
   return (
     <div>
+      <div ref={removeModalRef} className="remove-modal">
+        <h2>Are you sure you want to remove this element?</h2>
+        <div className="button-wrapper">
+          <button onClick={() => removeCollection(collectionToRemove)}>
+            Yes
+          </button>
+          <button
+            onClick={() => removeModalRef.current?.classList.remove("active")}
+          >
+            No
+          </button>
+        </div>
+      </div>
+
       <h2>Marketplace Data</h2>
       <div>
         <p>Create collection</p>
@@ -142,11 +171,6 @@ export default function UserBundleCollections({
 
       <div className="collection-wrapper">
         <p>My collections</p>
-        <div ref={removeModalRef} className="remove-modal">
-            <h2>Are you sure you want to remove this element?</h2>
-            <button onClick={() => removeCollection(collectionToRemove)}>Yes</button>
-            <button onClick={() => removeModalRef.current?.classList.remove('active')}>No</button>
-        </div>
         <ul className="collection-grid">
           {collections &&
             collections.map((collection, index) => (
@@ -163,7 +187,8 @@ export default function UserBundleCollections({
                 onContextMenu={(e) => {
                   e.preventDefault();
                   setCollectionToRemove(collection);
-                  removeModalRef.current?.classList.add('active')
+                  removeModalRef.current?.classList.add("active");
+                  positionModal(e);
                 }}
               >
                 {collection}

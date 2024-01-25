@@ -1,6 +1,6 @@
 import { MarketplaceData } from "@/types/MarketPlaceData";
 import UserBundleCollections from "./UserBundleCollections";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   DocumentData,
@@ -31,6 +31,8 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
   const [collectionElements, setCollectionElements] = useState<string[]>([]);
   const [sortCategories, setSortCategories] = useState<string[]>([]);
   const [sortSeller, setSortSeller] = useState<string[]>([]);
+  const [itemToRemove, setItemToRemove] = useState<string>("");
+  const removeModalRef = useRef<HTMLDivElement>(null);
 
   let user = useCurrentUser();
   const db = getFirestore(firebaseApp);
@@ -147,8 +149,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
     setSortSeller(getUniqueSellerNames(currentCollectionData));
   }, [currentCollectionData]);
 
-  const removeItemFromCollection = async (e: any, itemId: string) => {
-    e.preventDefault();
+  const removeItemFromCollection = async (itemId: string) => {
     if (!user) return;
     let collectionRef = doc(
       db,
@@ -162,11 +163,40 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
       bundles: arrayRemove(itemId),
     });
 
+    removeModalRef.current?.classList.remove("active");
     setCollectionElements((prev) => prev.filter((id) => id !== itemId));
+  };
+
+  const positionModal = (e: any) => {
+    var x = e.clientX;
+    var y = e.clientY;
+    x < 170 ? (x = 170) : (x = x);
+
+    if (x > window.innerWidth - 130) {
+      x = window.innerWidth - 130;
+    }
+
+    // @ts-ignore
+    removeModalRef.current.style.left = `${x}px`;
+    // @ts-ignore
+    removeModalRef.current.style.top = `${y}px`;
   };
 
   return (
     <div>
+      <div ref={removeModalRef} className="remove-modal">
+        <h2>Are you sure you want to remove this element?</h2>
+        <div className="button-wrapper">
+          <button onClick={() => removeItemFromCollection(itemToRemove)}>
+            Yes
+          </button>
+          <button
+            onClick={() => removeModalRef.current?.classList.remove("active")}
+          >
+            No
+          </button>
+        </div>
+      </div>
       <div>
         <div className="bundle-sort">
           SORTING
@@ -229,9 +259,12 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
                       "_blank"
                     )
                   }
-                  onContextMenu={async (e) =>
-                    removeItemFromCollection(e, item.id)
-                  }
+                  onContextMenu={async (e) => {
+                    e.preventDefault();
+                    setItemToRemove(item.id);
+                    removeModalRef.current?.classList.add("active");
+                    positionModal(e);
+                  }}
                 >
                   <h1>{item?.title}</h1>
                   {item?.thumbnail && (
