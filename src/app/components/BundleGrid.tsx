@@ -2,7 +2,16 @@ import { MarketplaceData } from "@/types/MarketPlaceData";
 import UserBundleCollections from "./UserBundleCollections";
 import { useEffect, useState } from "react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { DocumentData, DocumentSnapshot, doc, getDoc, getDocFromCache, getFirestore, initializeFirestore, persistentLocalCache } from "firebase/firestore";
+import {
+  DocumentData,
+  DocumentSnapshot,
+  arrayRemove,
+  doc,
+  getDoc,
+  getDocFromCache,
+  getFirestore,
+  updateDoc,
+} from "firebase/firestore";
 import { firebaseApp } from "@/firebase";
 import "./bundles.scss";
 
@@ -11,8 +20,13 @@ interface BundleGridProps {
 }
 
 export default function BundleGrid({ marketplaceData }: BundleGridProps) {
-  const [activeMarketplaceData, setActiveMarketplaceData] = useState< MarketplaceData["elements"] >([]);
-  const [currentCollectionData, setCurrentCollectionData] = useState< MarketplaceData["elements"] >([]);
+  const [activeMarketplaceData, setActiveMarketplaceData] = useState<
+    MarketplaceData["elements"]
+  >([]);
+  const [currentCollectionData, setCurrentCollectionData] = useState<
+    MarketplaceData["elements"]
+  >([]);
+  const [activeCollection, setActiveCollection] = useState<string>("all");
   const [draggedItem, setDraggedItem] = useState<any>(null);
   const [collectionElements, setCollectionElements] = useState<string[]>([]);
   const [sortCategories, setSortCategories] = useState<string[]>([]);
@@ -33,6 +47,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
     if (!user) return;
     let userRef = doc(db, "users", user.uid);
 
+    setActiveCollection(collectionName);
     async function fetchCollectionData() {
       const collectionRef = doc(
         userRef,
@@ -75,9 +90,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
     }
 
     setActiveMarketplaceData(
-      currentCollectionData.filter(
-        (item) => item.seller.name === seller
-      )
+      currentCollectionData.filter((item) => item.seller.name === seller)
     );
   };
 
@@ -99,14 +112,12 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
       },
       []
     );
-    
+
     return uniqueCategories.sort((a, b) => a.localeCompare(b));
-  }
+  };
 
   const getUniqueSellerNames = (dataSet: MarketplaceData["elements"]) => {
-    let allCategories = dataSet
-      .map((item) => item.seller.name)
-      .filter(Boolean);
+    let allCategories = dataSet.map((item) => item.seller.name).filter(Boolean);
 
     let uniqueSellerNames = allCategories.reduce(
       (unique: string[], item: any) => {
@@ -116,7 +127,7 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
     );
 
     return uniqueSellerNames.sort((a, b) => a.localeCompare(b));
-  }
+  };
 
   // Update active marketplace data when collection elements change
   useEffect(() => {
@@ -135,6 +146,24 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
     setSortCategories(getUniqueCategories(currentCollectionData));
     setSortSeller(getUniqueSellerNames(currentCollectionData));
   }, [currentCollectionData]);
+
+  const removeItemFromCollection = async (e: any, itemId: string) => {
+    e.preventDefault();
+    if (!user) return;
+    let collectionRef = doc(
+      db,
+      "users",
+      user.uid,
+      "collections",
+      activeCollection.toLowerCase()
+    );
+
+    await updateDoc(collectionRef, {
+      bundles: arrayRemove(itemId),
+    });
+
+    setCollectionElements((prev) => prev.filter((id) => id !== itemId));
+  };
 
   return (
     <div>
@@ -193,7 +222,16 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
                   key={item?.id}
                   onDragStart={(e) => setDraggedItem(e.target)}
                   onDragEnd={() => setDraggedItem(null)}
-                  onClick={() => window.open("https://www.unrealengine.com/marketplace/en-US/item/" + item.catalogItemId, "_blank")}
+                  onClick={() =>
+                    window.open(
+                      "https://www.unrealengine.com/marketplace/en-US/item/" +
+                        item.catalogItemId,
+                      "_blank"
+                    )
+                  }
+                  onContextMenu={async (e) =>
+                    removeItemFromCollection(e, item.id)
+                  }
                 >
                   <h1>{item?.title}</h1>
                   {item?.thumbnail && (

@@ -5,6 +5,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   getFirestore,
@@ -100,6 +101,21 @@ export default function UserBundleCollections({
     handleCollectionChange(collectionName);
   };
 
+  const removeCollection = async (e: any, collectionName: string) => {
+    e.preventDefault();
+
+    if (!user || collectionName.toLocaleLowerCase() === "all") return;
+    const userRef = doc(db, "users", user.uid);
+    const collectionsRef = doc(
+      userRef,
+      "collections",
+      collectionName.toLocaleLowerCase()
+    );
+
+    await deleteDoc(collectionsRef);
+    setCollections(collections.filter((name) => name !== collectionName));
+  };
+
   const handleDragEnter = (index: number, e: any) => {
     setHighlightedElement(index);
     setLastHoveredElement(e.target);
@@ -132,9 +148,13 @@ export default function UserBundleCollections({
                 onDragEnter={(e) => handleDragEnter(index, e)}
                 onDragLeave={() => setHighlightedElement(null)}
                 onDragOver={(e) => handleHoverWhileDragging(e)}
-                className={(highlightedElement === index ? "highlight" : "") + (activeCollectionIndex === index ? "active" : "")}
+                className={
+                  (highlightedElement === index ? "highlight" : "") +
+                  (activeCollectionIndex === index ? "active" : "")
+                }
                 key={collection}
                 onClick={(e) => changeCollection(collection, index)}
+                onContextMenu={(e) => removeCollection(e, collection)}
               >
                 {collection}
               </li>
