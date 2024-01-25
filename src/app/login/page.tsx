@@ -85,7 +85,7 @@ export default function Login() {
     <main>
       {user ? <h1>Profile</h1> : <h1>Login</h1>}
       {user && <h2>Hello {user.displayName}</h2>}
-      {user && <p><Link href={'/'}>See bundles</Link></p>}
+      {user && <p role="button" className="profile-button"><Link href={'/'}>Back to bundles </Link></p>}
       {!user ? (
         <button onClick={signIn}>Signup / Login with google</button>
       ) : (

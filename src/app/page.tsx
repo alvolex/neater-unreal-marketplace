@@ -112,7 +112,7 @@ export default function Home() {
       <h1>Bundle view</h1>
       {loading && <h1>Loading...</h1>}
       {user && <h2>Hello, {user.displayName}</h2>}
-      {user ? <h2><Link href={'/login'}> Go to profile page</Link></h2> : <h2><Link href={'/login'}> Sign in..</Link></h2>}
+      {user ? <h2 role="button" className="profile-button"><Link href={'/login'}> Go to profile page</Link></h2> : <h2><Link href={'/login'}> Sign in..</Link></h2>}
       <BundleGrid marketplaceData={marketplaceData} />
     </main>
   );

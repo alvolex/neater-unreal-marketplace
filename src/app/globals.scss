@@ -2,3 +2,67 @@
     background: black;
     color: white;
 }
+
+.profile-button {
+    width: max-content;
+    height: max-content;
+    background: white;
+    color: black;
+    padding: 10px;
+    border: 1px solid black;
+
+    transition: all 0.3s ease-in-out;
+
+    a {
+        color: black;
+        text-decoration: none;
+    }
+
+    &:hover {
+        background: black;
+        color: white;
+        border: 1px solid white;
+
+        a {
+            color: white;
+        }
+    }
+}
+
+input {
+    height: 20px;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+input+button {
+    height: 42px;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+
+    background: white;
+    color: black;
+    cursor: pointer;
+
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+        background: rgb(44, 48, 255);
+        color: white;
+    }
+}
+
+select{
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 3px;
+    margin-left: 10px;
+
+    background: white;
+    color: black;
+    cursor: pointer;
+}
