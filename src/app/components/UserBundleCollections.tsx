@@ -12,7 +12,7 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface UserBundleCollectionsProps {
   handleCollectionChange: (collectionName: string) => void;
@@ -31,6 +31,8 @@ export default function UserBundleCollections({
   const [activeCollectionIndex, setActiveCollectionIndex] = useState<number>(0);
   const [currentlyDraggedItem, setCurrentlyDraggedItem] = useState<any>(null);
   const [lastHoveredElement, setLastHoveredElement] = useState<any>(null);
+  const [collectionToRemove, setCollectionToRemove] = useState<string>("");
+  const removeModalRef = useRef<HTMLDivElement>(null);
 
   let user = useCurrentUser();
   const db = getFirestore(firebaseApp);
@@ -101,9 +103,7 @@ export default function UserBundleCollections({
     handleCollectionChange(collectionName);
   };
 
-  const removeCollection = async (e: any, collectionName: string) => {
-    e.preventDefault();
-
+  const removeCollection = async (collectionName: string) => {
     if (!user || collectionName.toLocaleLowerCase() === "all") return;
     const userRef = doc(db, "users", user.uid);
     const collectionsRef = doc(
@@ -113,6 +113,7 @@ export default function UserBundleCollections({
     );
 
     await deleteDoc(collectionsRef);
+    removeModalRef.current?.classList.remove('active');
     setCollections(collections.filter((name) => name !== collectionName));
   };
 
@@ -141,6 +142,11 @@ export default function UserBundleCollections({
 
       <div className="collection-wrapper">
         <p>My collections</p>
+        <div ref={removeModalRef} className="remove-modal">
+            <h2>Are you sure you want to remove this element?</h2>
+            <button onClick={() => removeCollection(collectionToRemove)}>Yes</button>
+            <button onClick={() => removeModalRef.current?.classList.remove('active')}>No</button>
+        </div>
         <ul className="collection-grid">
           {collections &&
             collections.map((collection, index) => (
@@ -154,7 +160,11 @@ export default function UserBundleCollections({
                 }
                 key={collection}
                 onClick={(e) => changeCollection(collection, index)}
-                onContextMenu={(e) => removeCollection(e, collection)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setCollectionToRemove(collection);
+                  removeModalRef.current?.classList.add('active')
+                }}
               >
                 {collection}
               </li>
