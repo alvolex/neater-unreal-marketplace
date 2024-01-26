@@ -28,7 +28,7 @@ export default function UserBundleCollections({
     null
   );
   const [collections, setCollections] = useState<string[]>([]);
-  const [activeCollectionIndex, setActiveCollectionIndex] = useState<number>(0);
+  const [activeCollectionIndex, setActiveCollectionIndex] = useState<number>(1337);
   const [currentlyDraggedItem, setCurrentlyDraggedItem] = useState<any>(null);
   const [lastHoveredElement, setLastHoveredElement] = useState<any>(null);
   const [collectionToRemove, setCollectionToRemove] = useState<string>("");
@@ -172,6 +172,9 @@ export default function UserBundleCollections({
       <div className="collection-wrapper">
         <p>My collections</p>
         <ul className="collection-grid">
+          <li onClick={()=> {changeCollection('all', 1337)}} className={activeCollectionIndex === 1337 ? "active" : ""}>
+            All
+          </li>
           {collections &&
             collections.map((collection, index) => (
               <li
