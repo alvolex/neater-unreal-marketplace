@@ -45,7 +45,7 @@ export default function Home() {
 
   const getDataFromApi = async (bearerToken: string) => {
     let res = await tryGetDataFromEpic(bearerToken);
-    
+
     // Use cached data from firestore if we cant get data from epic.
     if (!res) {
       const db = getFirestore(firebaseApp);
@@ -63,7 +63,9 @@ export default function Home() {
       }
 
       setLoading(false);
-      alert("Could not get data from epic and could not find cached data. Go to your profile and add your epic bearer token.");
+      alert(
+        "Could not get data from epic and could not find cached data. Go to your profile and add your epic bearer token."
+      );
       return;
     }
 
@@ -111,7 +113,16 @@ export default function Home() {
     bearerToken: string
   ) => {
     const bundlesCollectionRef = collection(userRef, "bundles");
-    const querySnapshot = await getDocsFromCache(bundlesCollectionRef);
+    let querySnapshot = await getDocsFromCache(bundlesCollectionRef);
+
+    //Check if the cached data has bundleData
+    const hasBundleData = querySnapshot.docs.some(
+      (doc) => doc.data().bundleData
+    );
+
+    if (!hasBundleData) {
+      querySnapshot = await getDocs(bundlesCollectionRef);
+    }
 
     if (querySnapshot.docs.length > 0) {
       let allElements = await getDataFromFirestore(querySnapshot);
