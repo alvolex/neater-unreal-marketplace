@@ -23,6 +23,7 @@ export async function GET(request: Request) {
       );
 
       if (!response.ok || response.headers.get("content-type") !== "application/json; charset=utf-8") {
+        console.log("Bad token")
         return {error: new Response("Bad response from server. Most likely due to an issue with the provided token.", { status: 500 })}
       }
 
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
   let data = await fetchData();
   
   if (data.error) {
-    return data.error;
+    return new Response("Token provided did not work, go to profile page and update it.", { status: 401 });
   }
 
   //!! todo: see if we can do this in a better way so we dont spam the server with requests

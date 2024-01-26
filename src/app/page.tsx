@@ -3,15 +3,17 @@
 import { firebaseApp } from "@/firebase";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { MarketplaceData } from "@/types/MarketPlaceData";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { User } from "firebase/auth";
 import {
   DocumentData,
   DocumentReference,
+  QuerySnapshot,
   collection,
   doc,
   getDoc,
   getDocs,
+  getDocsFromCache,
   getFirestore,
   setDoc,
 } from "firebase/firestore";
@@ -26,10 +28,45 @@ export default function Home() {
   >([]);
   let user = useCurrentUser();
 
+  const tryGetDataFromEpic = async (bearerToken: string) => {
+    try {
+      let res = await axios.get("/api/getMarketplaceData", {
+        headers: { Authorization: `${bearerToken}` },
+      });
+
+      return res;
+    } catch (error: any) {
+      if (error.response) {
+        console.log(error.response.data);
+      }
+      return null;
+    }
+  };
+
   const getDataFromApi = async (bearerToken: string) => {
-    const res = await axios.get("/api/getMarketplaceData", {
-      headers: { Authorization: `${bearerToken}` },
-    });
+    let res = await tryGetDataFromEpic(bearerToken);
+    
+    // Use cached data from firestore if we cant get data from epic.
+    if (!res) {
+      const db = getFirestore(firebaseApp);
+
+      if (!user) return;
+      const userRef = doc(db, "users", user.uid);
+      const bundlesCollectionRef = collection(userRef, "bundles");
+      const querySnapshot = await getDocs(bundlesCollectionRef);
+
+      if (querySnapshot.docs.length > 0) {
+        let allElements = await getDataFromFirestore(querySnapshot);
+        setMarketplaceData(allElements);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+      alert("Could not get data from epic and could not find cached data. Go to your profile and add your epic bearer token.");
+      return;
+    }
+
     let data: MarketplaceData = res.data;
     setMarketplaceData(data.elements);
     setLoading(false);
@@ -54,22 +91,31 @@ export default function Home() {
     });
   };
 
+  const getDataFromFirestore = async (
+    querySnapshot: QuerySnapshot<DocumentData, DocumentData>
+  ) => {
+    // Handle the chunks of data and concat them into one array
+    let allElements: MarketplaceData["elements"] = [];
+    querySnapshot.docs.forEach((doc) => {
+      const bundleData = (doc.data() as any).bundleData;
+      if (bundleData) {
+        allElements = allElements.concat(bundleData);
+      }
+    });
+
+    return allElements;
+  };
+
   const handleCachedData = async (
     userRef: DocumentReference<DocumentData, DocumentData>,
     bearerToken: string
   ) => {
     const bundlesCollectionRef = collection(userRef, "bundles");
-    const querySnapshot = await getDocs(bundlesCollectionRef);
+    const querySnapshot = await getDocsFromCache(bundlesCollectionRef);
 
     if (querySnapshot.docs.length > 0) {
-      // Handle the chunks of data and concat them into one array
-      let allElements: MarketplaceData["elements"] = [];
-      querySnapshot.docs.forEach((doc) => {
-        const bundleData = (doc.data() as any).bundleData;
-        if (bundleData) {
-          allElements = allElements.concat(bundleData);
-        }
-      });
+      let allElements = await getDataFromFirestore(querySnapshot);
+      console.log("Using cached data");
       setMarketplaceData(allElements);
       setLoading(false);
     } else {
@@ -112,7 +158,15 @@ export default function Home() {
       <h1>Bundle view</h1>
       {loading && <h1>Loading...</h1>}
       {user && <h2>Hello, {user.displayName}</h2>}
-      {user ? <h2 role="button" className="profile-button"><Link href={'/login'}> Go to profile page</Link></h2> : <h2><Link href={'/login'}> Sign in..</Link></h2>}
+      {user ? (
+        <h2 role="button" className="profile-button">
+          <Link href={"/login"}> Go to profile page</Link>
+        </h2>
+      ) : (
+        <h2>
+          <Link href={"/login"}> Sign in..</Link>
+        </h2>
+      )}
       <BundleGrid marketplaceData={marketplaceData} />
     </main>
   );
