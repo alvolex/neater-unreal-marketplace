@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { firebaseApp } from "@/firebase";
 import "./bundles.scss";
-import Image from "next/image";
+import Image, { ImageLoader } from "next/image";
 
 interface BundleGridProps {
   marketplaceData: MarketplaceData["elements"];
@@ -270,7 +270,9 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
                   <h1>{item?.title}</h1>
                   {item?.thumbnail && (
 /*                     <img src={item.thumbnail} alt={item.id} /> */
-                    <Image src={item.thumbnail} alt={item.id} width={300} height={300} />
+                    <Image 
+                    loader={(item.thumbnail as unknown as ImageLoader)} 
+                    src={''} alt={item.id} width={300} height={300} />
                 )}
                 <div className="description">
                     <p>{item.categories && item?.categories[0].name}</p>
