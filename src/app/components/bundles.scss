@@ -14,7 +14,7 @@ div.all-bundles ul {
     width: 100%;
 
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, 300px);
     grid-gap: 10px;
     grid-auto-rows: minmax(300px, auto);
     grid-auto-flow: dense;
