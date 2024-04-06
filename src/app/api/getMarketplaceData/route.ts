@@ -7,6 +7,9 @@ export async function GET(request: Request) {
 
   var myHeaders = new Headers({
     Cookie: "EPIC_BEARER_TOKEN="+ token + ";",
+    "User-Agent": "PostmanRuntime/7.37.3",
+    "Accept": "*/*",
+    "Host": "www.unrealengine.com",
   });
 
   var requestOptions: RequestInit = {
