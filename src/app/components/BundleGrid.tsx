@@ -177,6 +177,8 @@ export default function BundleGrid({ marketplaceData }: BundleGridProps) {
       x = window.innerWidth - 130;
     }
 
+    y = y + window.scrollY;
+
     // @ts-ignore
     removeModalRef.current.style.left = `${x}px`;
     // @ts-ignore
