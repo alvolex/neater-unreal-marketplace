@@ -28,10 +28,13 @@ export default function Home() {
   >([]);
   let user = useCurrentUser();
 
-  const tryGetDataFromEpic = async (bearerToken: string) => {
+  const tryGetDataFromEpic = async (token: {
+    bearerToken: string;
+    XSRFToken: string;
+  }) => {
     try {
       let res = await axios.get("/api/getMarketplaceData", {
-        headers: { Authorization: `${bearerToken}` },
+        headers: { Bearer: `${token.bearerToken}`, XSRFToken: `${token.XSRFToken}` },
       });
 
       return res;
@@ -43,8 +46,11 @@ export default function Home() {
     }
   };
 
-  const getDataFromApi = async (bearerToken: string) => {
-    let res = await tryGetDataFromEpic(bearerToken);
+  const getDataFromApi = async (token: {
+    bearerToken: string;
+    XSRFToken: string;
+  }) => {
+    let res = await tryGetDataFromEpic(token);
 
     // Use cached data from firestore if we cant get data from epic.
     if (!res) {
@@ -80,7 +86,7 @@ export default function Home() {
     const bundlesCollectionRef = collection(userRef, "bundles");
 
     // Create chunks of data to store in firestore so we dont hit the 1mb limit
-    const chunkSize = 100;
+    const chunkSize = 50;
     for (let i = 0; i < data.elements.length; i += chunkSize) {
       const chunk = data.elements.slice(i, i + chunkSize);
       const docRef = doc(bundlesCollectionRef, i.toString());
@@ -110,7 +116,7 @@ export default function Home() {
 
   const handleCachedData = async (
     userRef: DocumentReference<DocumentData, DocumentData>,
-    bearerToken: string
+    token: { bearerToken: string; XSRFToken: string}
   ) => {
     const bundlesCollectionRef = collection(userRef, "bundles");
     let querySnapshot = await getDocsFromCache(bundlesCollectionRef);
@@ -130,11 +136,15 @@ export default function Home() {
       setMarketplaceData(allElements);
       setLoading(false);
     } else {
-      await getDataFromApi(bearerToken);
+      await getDataFromApi(token);
     }
   };
 
-  const fetchData = async (user: User, bearerToken: string) => {
+  const fetchData = async (user: User, tokens: {
+    bearerToken: string;
+    XSRFToken: string;
+  
+  }) => {
     const db = getFirestore(firebaseApp);
     const userRef = doc(db, "users", user.uid);
     const lastUpdateRef = doc(userRef, "bundles", "lastUpdated");
@@ -147,20 +157,24 @@ export default function Home() {
       let diffHours = diff / (1000 * 3600);
 
       if (diffHours < 6) {
-        handleCachedData(userRef, bearerToken);
+        handleCachedData(userRef, tokens);
       } else {
-        await getDataFromApi(bearerToken);
+        await getDataFromApi(tokens);
       }
     } else {
-      await getDataFromApi(bearerToken);
+      await getDataFromApi(tokens);
     }
   };
 
   useEffect(() => {
     const bearerToken = localStorage.getItem("bearerToken");
+    const XSRFToken = localStorage.getItem("XSRFToken") as string;
     if (user && bearerToken) {
       setLoading(true);
-      fetchData(user, bearerToken);
+      fetchData(user, {
+        bearerToken,
+        XSRFToken: XSRFToken,
+      });
     }
   }, [user]);
 

@@ -15,6 +15,7 @@ import Link from "next/link";
 export default function Login() {
   const [user, setUser] = useState<User | null>(null);
   const [bearerToken, setBearerToken] = useState<string>("");
+  const [XSRFToken, setXSRFToken] = useState<string>("");
 
   const provider = new GoogleAuthProvider();
   const auth = getAuth(firebaseApp);
@@ -62,6 +63,16 @@ export default function Login() {
           }
         }
       });
+
+      getDoc(doc(userRef, "preferences", "XSRFToken")).then((docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data) {
+            setXSRFToken(data.XSRFToken);
+            localStorage.setItem("XSRFToken", data.XSRFToken);
+          }
+        }
+      });
     }
   }, [user, db]);
 
@@ -73,6 +84,10 @@ export default function Login() {
 
       localStorage.setItem("bearerToken", bearerToken);
       await setDoc(prefRef, { bearerToken });
+
+      const XSRFTokenRef = doc(userRef, "preferences", "XSRFToken");
+      localStorage.setItem("XSRFToken", XSRFToken);
+      await setDoc(XSRFTokenRef, { XSRFToken: XSRFToken });
     }
   };
 
@@ -99,6 +114,15 @@ export default function Login() {
                 placeholder="Enter your bearer token"
                 onChange={(e) => setBearerToken(e.target.value)}
                 value={bearerToken}
+              />
+            </label>
+            <label>
+              XSRF Token
+              <input
+                type="text"
+                placeholder="Enter your bearer token"
+                onChange={(e) => setXSRFToken(e.target.value)}
+                value={XSRFToken}
               />
             </label>
             <button onClick={updateUserPref}>Update user preferences</button>

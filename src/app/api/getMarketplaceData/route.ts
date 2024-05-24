@@ -1,12 +1,16 @@
 export async function GET(request: Request) {
-  let token = request.headers.get("Authorization");
+  let bearerToken = request.headers.get("Bearer");
+  let XSRFToken = request.headers.get("XSRFToken");
 
-  if (!token) {
+  if (!bearerToken) {
     return new Response("Unauthorized", { status: 401 });
   }
 
+  console.log("Bearer token", bearerToken);
+  console.log("XSRF token", XSRFToken);
+
   var myHeaders = new Headers({
-    Cookie: "EPIC_BEARER_TOKEN="+ token + ";",
+    Cookie: "XSRF-TOKEN=" + XSRFToken + "; EPIC_BEARER_TOKEN=" + bearerToken,
     "User-Agent": "PostmanRuntime/7.37.3",
     "Accept": "*/*",
     "Host": "www.unrealengine.com",
